@@ -76,6 +76,8 @@ ifconfig # 发现作业一的e1000网卡驱动被启用了
 - 禁用Linux内核默认的C版本的e1000网卡驱动
 
 ```bash
+make LLVM=1 menuconfig
+
 Device Drivers 
     ---> Network device support
         ---> Ethernet driver support
