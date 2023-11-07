@@ -1,13 +1,9 @@
 <p align="center">
-  <a href="https://example.com/">
-    <img src=".imgs/head.png" alt="Logo" width=72 height=72>
-  </a>
-
+  <img src=".imgs/head.png" alt="Logo" width=72 height=72>
   <h3 align="center">熊义</h3>
-
   <p align="center">
     第二阶段 rust for linux 作业报告
-    <br>
+  <br>
 </p>
 
 
