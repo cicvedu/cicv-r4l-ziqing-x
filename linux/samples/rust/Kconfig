@@ -163,4 +163,11 @@ config SAMPLE_RUST_SELFTESTS
 
 	  If unsure, say N.
 
+config SAMPLE_RUST_HELLOWORLD
+	tristate "Print hello world module"
+	help
+	  To compile this as a module, choose M here:
+
+	  If unsure, say N.
+
 endif # SAMPLES_RUST

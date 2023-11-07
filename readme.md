@@ -17,7 +17,7 @@
 - [作业5-注册字符设备](#作业5-注册字符设备)
 - [结语](#结语)
 
-
+***
 ## 作业1-编译Linux内核
 
 - 生成适用于x86_64架构的默认配置
@@ -43,6 +43,8 @@ make LLVM=1 -j$(nproc)
 ls vmlinux
 ```
 ![图1-3](.imgs/task1/3.png "编译内核")
+
+***
 
 ## 作业2-对Linux内核进行一些配置
 + 问题1、编译成内核模块，是在哪个文件中以哪条语句定义的？
@@ -152,14 +154,96 @@ ping 10.0.2.2
 ```
 ![图2-13](.imgs/task2/13.png "测试网络是否正常")
 
+***
+
 ## 作业3-使用rust编写一个简单的内核模块并运行
 
+- 进入到Linux目录下samples/rust文件夹
+- 添加一个rust_helloworld.rs文件
+- 在该文件中添加如下内容
+
+```Rust
+// SPDX-License-Identifier: GPL-2.0
+//! Rust minimal sample.
+      
+use kernel::prelude::*;
+      
+module! {
+  type: RustHelloWorld,
+  name: "rust_helloworld",
+  author: "whocare",
+  description: "hello world module in rust",
+  license: "GPL",
+}
+      
+struct RustHelloWorld {}
+      
+impl kernel::Module for RustHelloWorld {
+  fn init(_name: &'static CStr, _module: &'static ThisModule) -> Result<Self> {
+      pr_info!("Hello World from Rust module");
+      Ok(RustHelloWorld {})
+  }
+}
+```
+![图3-1](.imgs/task3/1.png "添加代码")
+
+- 修改Makefile
+
+```Makefile
+# 在倒数第二行追加这行代码
+obj-$(CONFIG_SAMPLE_RUST_HELLOWORLD)	+= rust_helloworld.o
+```
+![图3-2](.imgs/task3/2.png "修改Makefile")
+
+- 修改Kconfig
+
+```bash
+# 在倒数第二行添加下面代码
+config SAMPLE_RUST_HELLOWORLD
+	tristate "Print hello world module"
+	help
+	  To compile this as a module, choose M here:
+
+	  If unsure, say N.
+```
+![图3-3](.imgs/task3/3.png "修改Kconfig")
+
+- 更改该模块的配置，使之编译成模块
+
+```bash
+Kernel hacking
+  ---> Sample Kernel code
+      ---> Rust samples
+              ---> <M>Print Helloworld in Rust (NEW)
+```
+![图3-4](.imgs/task3/4.png "更改该模块的配置，使之编译成模块")
+
+- 编译内核
+
+```bash
+time make LLVM=1 -j$(nproc)
+```
+![图3-5](.imgs/task3/5.png "编译内核")
+
+- 在qemu环境运行驱动
+
+```bash
+cp linux/samples/rust/rust_helloworld.ko src_e1000/rootfs
+./build_image.sh
+# 系统起来后
+insmod rust_helloworld.ko
+```
+![图3-6](.imgs/task3/6.png "在qemu环境运行驱动")
+
+***
 
 ## 作业4-为e1000网卡驱动添加remove代码
 
+***
 
 ## 作业5-注册字符设备
 
+***
 
 ## 结语
 Enjoy :metal:
