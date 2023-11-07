@@ -229,7 +229,7 @@ time make LLVM=1 -j$(nproc)
 
 ```bash
 cp linux/samples/rust/rust_helloworld.ko src_e1000/rootfs
-./build_image.sh
+cd src_e1000 && ./build_image.sh
 # 系统起来后
 insmod rust_helloworld.ko
 ```
