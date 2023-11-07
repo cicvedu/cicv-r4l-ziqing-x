@@ -49,13 +49,12 @@ ls vmlinux
 ![图1-3](.imgs/task1/3.png "编译内核")
 
 ## 作业2-对Linux内核进行一些配置
-+ 问题解答
-  + 1、编译成内核模块，是在哪个文件中以哪条语句定义的？
++ 问题1、编译成内核模块，是在哪个文件中以哪条语句定义的？
 
 ```bash
 答：Kbuild文件里的obj-m := r4l_e1000_demo.o
 ```
-  + 2、该模块位于独立的文件夹内，却能编译成Linux内核模块，这叫做out-of-tree module，请分析它是如何与内核代码产生联系的？
++ 问题2、该模块位于独立的文件夹内，却能编译成Linux内核模块，这叫做out-of-tree module，请分析它是如何与内核代码产生联系的？
 
 ```bash
 答：Makefile里通过make的-C选项把当前工作目录转移到了linux目录下，内核的构建系统通过M=$$PWD 来定位独立模块的源代码，从而实现驱动的编译
@@ -82,9 +81,9 @@ ifconfig # 发现作业一的e1000网卡驱动被启用了
 
 ```bash
 Device Drivers 
-    > Network device support
-        > Ethernet driver support
-            > Intel devices, Intel(R) PRO/1000 Gigabit Ethernet support
+    ---> Network device support
+        ---> Ethernet driver support
+            ---> Intel devices, Intel(R) PRO/1000 Gigabit Ethernet support
 ```
 ![图2-3](.imgs/task2/3.png "禁用Linux内核默认的C版本的e1000网卡驱动")
 
