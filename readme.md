@@ -135,7 +135,7 @@ ip route add default via 10.0.2.1
 ```bash
 ifconfig
 ```
-![图2-12](.imgs/task2/12.png "查看网卡情况")
+![图2-12](.imgs/task2/12.png "查看网口信息")
 
 - 测试网络是否正常
 
@@ -262,7 +262,7 @@ cp samples/rust/rust_chrdev.ko ../src_e1000/rootfs/
 cd ../src_e1000/
 ./build_image.sh
 ```
-![图3-6](.imgs/task5/2.png "更改配置")
+![图3-6](.imgs/task5/2.png "编译并运行")
 
 - 加载驱动并验证结果
 
