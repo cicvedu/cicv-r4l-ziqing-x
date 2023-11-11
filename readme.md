@@ -47,16 +47,6 @@ ls vmlinux
 ***
 
 ## 作业2-对Linux内核进行一些配置
-+ 问题1、编译成内核模块，是在哪个文件中以哪条语句定义的？
-
-```bash
-答：Kbuild文件里的obj-m := r4l_e1000_demo.o
-```
-+ 问题2、该模块位于独立的文件夹内，却能编译成Linux内核模块，这叫做out-of-tree module，请分析它是如何与内核代码产生联系的？
-
-```bash
-答：Makefile里通过make的-C选项把当前工作目录转移到了linux目录下，内核的构建系统通过M=$$PWD 来定位独立模块的源代码，从而实现驱动的编译
-```
 
 - 编译e1000网卡驱动
 
@@ -154,6 +144,17 @@ ping 10.0.2.2
 ```
 ![图2-13](.imgs/task2/13.png "测试网络是否正常")
 
++ 问题1、编译成内核模块，是在哪个文件中以哪条语句定义的？
+
+```bash
+答：Kbuild文件里的obj-m := r4l_e1000_demo.o
+```
++ 问题2、该模块位于独立的文件夹内，却能编译成Linux内核模块，这叫做out-of-tree module，请分析它是如何与内核代码产生联系的？
+
+```bash
+答：Makefile里通过make的-C选项把当前工作目录转移到了linux目录下，内核的构建系统通过M=$$PWD 来定位独立模块的源代码，从而实现驱动的编译
+```
+
 ***
 
 ## 作业3-使用rust编写一个简单的内核模块并运行
@@ -243,7 +244,54 @@ insmod rust_helloworld.ko
 
 ## 作业5-注册字符设备
 
+- 更改配置
+
+```bash
+Kernel hacking
+  ---> Sample Kernel code
+      ---> Rust samples
+              ---> <*>Character device (NEW)
+```
+![图3-6](.imgs/task5/1.png "更改配置")
+
+- 编译并运行
+
+```bash
+make LLVM=1 -j$(nproc)
+cp samples/rust/rust_chrdev.ko ../src_e1000/rootfs/
+cd ../src_e1000/
+./build_image.sh
+```
+![图3-6](.imgs/task5/2.png "更改配置")
+
+- 加载驱动并验证结果
+
+```bash
+insmod rust_chrdev.ko
+echo "Hello" > /dev/cicv
+cat /dev/cicv
+```
+![图3-6](.imgs/task5/3.png "加载驱动并验证结果")
+
+- 问题1、作业5中的字符设备/dev/cicv是怎么创建的？
+
+```bash
+答: 作业5中的字符设备/dev/cicv是在Linux的启动脚本/etc/init.d/rcS.sh里通过mknod /dev/cicv c 248 0命令创建的。
+```
+- 问题2、它的设备号是多少？
+
+```bash
+答: /dev/cicv的主设备号是248, 次设备号是0。
+```
+- 问题3、它是如何与我们写的字符设备驱动关联上的？
+
+```bash
+答: 通过设备号248进行关联的。
+```
+
+![图3-6](.imgs/task5/4.png "设备号")
+
 ***
 
 ## 结语
-Enjoy :metal:
+纸上得来终觉浅，绝知此事要躬行 :metal:
