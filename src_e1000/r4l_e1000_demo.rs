@@ -206,6 +206,7 @@ impl net::DeviceOperations for NetDevice {
 
     fn stop(_dev: &net::Device, _data: &NetDevicePrvData) -> Result {
         pr_info!("Rust for linux e1000 driver demo (net device stop)\n");
+        NetDevice::e1000_recycle_tx_queue(_dev, _data);
         Ok(())
     }
 
@@ -311,14 +312,23 @@ impl kernel::irq::Handler for E1000InterruptHandler {
 /// the private data for the adapter
 struct E1000DrvPrvData {
     _netdev_reg: net::Registration<NetDevice>,
+    bars: i32,
+    irq: u32,
+    pci_dev_ptr: *mut bindings::pci_dev,
+    e1000_hw_ops: Arc<E1000Ops>,
 }
 
 impl driver::DeviceRemoval for E1000DrvPrvData {
     fn device_remove(&self) {
+        let dev = &self._netdev_reg.dev_get();
+        dev.netif_carrier_off();
+        dev.netif_stop_queue();
+        drop(&self._netdev_reg);
         pr_info!("Rust for linux e1000 driver demo (device_remove)\n");
     }
 }
-
+unsafe impl Send for E1000DrvPrvData {}
+unsafe impl Sync for E1000DrvPrvData {}
 struct NapiHandler {}
 
 impl net::NapiPoller for NapiHandler {
@@ -465,14 +475,32 @@ impl pci::Driver for E1000Drv {
             irq,
             _irq_handler: AtomicPtr::new(core::ptr::null_mut()),
         })?)?;
-
-        Ok(Box::try_new(E1000DrvPrvData {
-            // Must hold this registration, or the device will be removed.
-            _netdev_reg: netdev_reg,
-        })?)
+        let e1000_hw_ops = E1000Ops {
+            mem_addr: Arc::clone(&mem_addr),
+            io_addr: Arc::clone(&io_addr),
+        };
+        Ok(Box::try_new(
+            E1000DrvPrvData{
+                // Must hold this registration, or the device will be removed.
+                _netdev_reg: netdev_reg,
+                bars,
+                irq,
+                pci_dev_ptr: dev.to_ptr(),
+                e1000_hw_ops: Arc::try_new(e1000_hw_ops)?,
+            }
+        )?)
     }
 
     fn remove(data: &Self::Data) {
+        //let irq = data.irq;
+        let bars = data.bars;
+        let pci_dev_ptr = data.pci_dev_ptr;
+        unsafe {
+            bindings::pci_clear_master(pci_dev_ptr);
+            bindings::pci_release_selected_regions(pci_dev_ptr, bars);
+            bindings::pci_disable_device(pci_dev_ptr);
+        };
+        data.e1000_hw_ops.as_arc_borrow().e1000_reset_hw();
         pr_info!("Rust for linux e1000 driver demo (remove)\n");
     }
 }
