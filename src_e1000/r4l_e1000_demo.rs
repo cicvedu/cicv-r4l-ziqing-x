@@ -236,7 +236,7 @@ impl net::DeviceOperations for NetDevice {
         let rdt = data.e1000_hw_ops.e1000_read_rx_queue_tail();
         let rdh = data.e1000_hw_ops.e1000_read_rx_queue_head();
 
-        pr_info!("Rust for linux e1000 driver demo (net device start_xmit) tdt={}, tdh={}, rdt={}, rdh={}\n", tdt, tdh, rdt, rdh);
+        //pr_info!("Rust for linux e1000 driver demo (net device start_xmit) tdt={}, tdh={}, rdt={}, rdh={}\n", tdt, tdh, rdt, rdh);
 
         /* On PCI/PCI-X HW, if packet size is less than ETH_ZLEN,
          * packets may get corrupted during padding by HW.
@@ -307,11 +307,11 @@ impl kernel::irq::Handler for E1000InterruptHandler {
     type Data = Box<IrqPrivateData>;
 
     fn handle_irq(data: &IrqPrivateData) -> kernel::irq::Return {
-        pr_info!("Rust for linux e1000 driver demo (handle_irq)\n");
+        //pr_info!("Rust for linux e1000 driver demo (handle_irq)\n");
 
         let pending_irqs = data.e1000_hw_ops.e1000_read_interrupt_state();
 
-        pr_info!("pending_irqs: {}\n", pending_irqs);
+        //pr_info!("pending_irqs: {}\n", pending_irqs);
 
         if pending_irqs == 0 {
             return kernel::irq::Return::None;
@@ -344,7 +344,7 @@ impl net::NapiPoller for NapiHandler {
     type Data = Box<NetDevicePrvData>;
 
     fn poll(_napi: &net::Napi, _budget: i32, dev: &net::Device, data: &NetDevicePrvData) -> i32 {
-        pr_info!("Rust for linux e1000 driver demo (napi poll)\n");
+        //pr_info!("Rust for linux e1000 driver demo (napi poll)\n");
 
         let mut rdt = data.e1000_hw_ops.e1000_read_rx_queue_tail() as usize;
         rdt = (rdt + 1) % RX_RING_SIZE;
