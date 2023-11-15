@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh 
 busybox_folder="../busybox-1.36.1"
 kernel_image="../linux/arch/x86/boot/bzImage"
 work_dir=$PWD
@@ -34,7 +34,7 @@ echo "ip addr add broadcast 10.0.2.255 dev eth0" >> test_net.sh
 echo "ip addr add 10.0.2.15/255.255.255.0 dev eth0" >> test_net.sh
 echo "ip route add default via 10.0.2.1" >> test_net.sh
 echo "ifconfig" >> test_net.sh
-chmod +x /test_net.sh
+chmod +x test_net.sh
 
 if [ -f $rootfs_img ]; then
     rm $rootfs_img
