@@ -26,6 +26,16 @@ echo "mount -t sysfs none /sys" >> etc/init.d/rcS
 echo "/sbin/mdev -s" >> etc/init.d/rcS
 echo "mknod /dev/cicv c 248 0" >> etc/init.d/rcS
 chmod +x etc/init.d/rcS
+
+# for test net
+echo "#!/bin/sh" > test_net.sh
+echo "ip link set eth0 up" >> test_net.sh
+echo "ip addr add broadcast 10.0.2.255 dev eth0" >> test_net.sh
+echo "ip addr add 10.0.2.15/255.255.255.0 dev eth0" >> test_net.sh
+echo "ip route add default via 10.0.2.1" >> test_net.sh
+echo "ifconfig" >> test_net.sh
+chmod +x /test_net.sh
+
 if [ -f $rootfs_img ]; then
     rm $rootfs_img
 fi
