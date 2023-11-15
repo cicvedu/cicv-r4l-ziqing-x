@@ -206,7 +206,21 @@ impl net::DeviceOperations for NetDevice {
 
     fn stop(_dev: &net::Device, _data: &NetDevicePrvData) -> Result {
         pr_info!("Rust for linux e1000 driver demo (net device stop)\n");
-        NetDevice::e1000_recycle_tx_queue(_dev, _data);
+        NetDevice::e1000_recycle_tx_queue(&_dev, &_data);
+        *_data.tx_ring.lock() = None;
+        *_data.rx_ring.lock() = None;
+
+        unsafe {
+            let ptr = Box::from_raw(
+                _data
+                    ._irq_handler
+                    .load(core::sync::atomic::Ordering::Relaxed),
+            );
+        }
+
+        _dev.netif_carrier_off();
+        _dev.netif_stop_queue();
+        _data.napi.disable();
         Ok(())
     }
 
@@ -313,17 +327,12 @@ impl kernel::irq::Handler for E1000InterruptHandler {
 struct E1000DrvPrvData {
     _netdev_reg: net::Registration<NetDevice>,
     bars: i32,
-    irq: u32,
     pci_dev_ptr: *mut bindings::pci_dev,
     e1000_hw_ops: Arc<E1000Ops>,
 }
 
 impl driver::DeviceRemoval for E1000DrvPrvData {
     fn device_remove(&self) {
-        let dev = &self._netdev_reg.dev_get();
-        dev.netif_carrier_off();
-        dev.netif_stop_queue();
-        drop(&self._netdev_reg);
         pr_info!("Rust for linux e1000 driver demo (device_remove)\n");
     }
 }
@@ -479,20 +488,16 @@ impl pci::Driver for E1000Drv {
             mem_addr: Arc::clone(&mem_addr),
             io_addr: Arc::clone(&io_addr),
         };
-        Ok(Box::try_new(
-            E1000DrvPrvData{
-                // Must hold this registration, or the device will be removed.
-                _netdev_reg: netdev_reg,
-                bars,
-                irq,
-                pci_dev_ptr: dev.to_ptr(),
-                e1000_hw_ops: Arc::try_new(e1000_hw_ops)?,
-            }
-        )?)
+        Ok(Box::try_new(E1000DrvPrvData {
+            // Must hold this registration, or the device will be removed.
+            _netdev_reg: netdev_reg,
+            bars,
+            pci_dev_ptr: dev.to_ptr(),
+            e1000_hw_ops: Arc::try_new(e1000_hw_ops)?,
+        })?)
     }
 
     fn remove(data: &Self::Data) {
-        //let irq = data.irq;
         let bars = data.bars;
         let pci_dev_ptr = data.pci_dev_ptr;
         unsafe {
