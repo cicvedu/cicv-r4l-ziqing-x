@@ -240,6 +240,38 @@ insmod rust_helloworld.ko
 
 ## 作业4-为e1000网卡驱动添加remove代码
 
+- 加载驱动
+
+```bash
+insmod r4l_e1000_demo.ko
+```
+- 配置网络
+
+```bash
+# 为了方便测试，写到了test_net.sh脚本里了
+ip link set eth0 up
+ip addr add broadcast 10.0.2.255 dev eth0
+ip addr add 10.0.2.15/255.255.255.0 dev eth0
+ip route add default via 10.0.2.1
+```
+- 测试网络是否正常
+![图4-1](.imgs/task4/1.png "加载驱动测试正常")
+- 重新加载驱动
+```bash
+rmmod r4l_e1000_demo
+insmod r4l_e1000_demo.ko
+```
+- 配置网络
+```bash
+# 为了方便测试，写到了test_net.sh脚本里了
+ip link set eth0 up
+ip addr add broadcast 10.0.2.255 dev eth0
+ip addr add 10.0.2.15/255.255.255.0 dev eth0
+ip route add default via 10.0.2.1
+```
+- 再次测试网络是否正常
+![图4-2](.imgs/task4/2.png "重新加载驱动测试正常")
+
 ***
 
 ## 作业5-注册字符设备
